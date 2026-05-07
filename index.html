@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ultimate Gambling - Freischalt System</title>
+<title>Ultimate Gambling - High Stakes</title>
 
 <style>
 * {
@@ -277,6 +277,12 @@ h1 {
   margin: 10px 0;
 }
 
+.pack .cost.high-stakes {
+  color: #ff6600;
+  text-shadow: 0 0 5px rgba(255,102,0,0.5);
+  font-size: 32px;
+}
+
 .pack .reward-info {
   font-size: 12px;
   margin: 10px 0;
@@ -299,6 +305,16 @@ h1 {
   padding: 5px;
   background: rgba(0,0,0,0.5);
   border-radius: 8px;
+}
+
+.pack .stakes-badge {
+  background: linear-gradient(135deg, #ff6600, #ff3300);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  display: inline-block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
 button {
@@ -628,13 +644,13 @@ button:hover:not(:disabled) {
 </div>
 </div>
 <div style="display:flex; gap:10px; align-items:center;">
-<div class="coins">🪙 <span id="coins">10</span></div>
+<div class="coins">🪙 <span id="coins">1000</span></div>
 <button class="reset-btn" onclick="resetGame()">🔄 Reset</button>
 </div>
 </header>
 
 <div class="container">
-<h2 class="section-title">🎲 Packs (Freischaltbar)</h2>
+<h2 class="section-title">🎲 High Stakes Packs</h2>
 <div class="packs" id="packs"></div>
 
 <div class="profile">
@@ -704,22 +720,41 @@ const RARITIES = {
   secret: { name: "Secret", color: "white", value: 105000, dropChance: 0.1, duplicateReturn: 110000, order: 11, requiredPrevious: true }
 };
 
-// Freischalt-Reihenfolge
-const UNLOCK_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'ultimate', 'transcendent', 'cosmic', 'divine', 'secret'];
-
+// Packs - Common bleibt bei 10, alle anderen x100
+// Original costs * 100
 const packs = [
-  {id:"common",name:"Common Pack",cost:10,rarity:"common",requiredRarity: null},
-  {id:"uncommon",name:"Uncommon Pack",cost:25,rarity:"uncommon",requiredRarity: "common"},
-  {id:"rare",name:"Rare Pack",cost:60,rarity:"rare",requiredRarity: "uncommon"},
-  {id:"epic",name:"Epic Pack",cost:150,rarity:"epic",requiredRarity: "rare"},
-  {id:"legendary",name:"Legendary Pack",cost:350,rarity:"legendary",requiredRarity: "epic"},
-  {id:"mythic",name:"Mythic Pack",cost:800,rarity:"mythic",requiredRarity: "legendary"},
-  {id:"ultimate",name:"Ultimate Pack",cost:1800,rarity:"ultimate",requiredRarity: "mythic"},
-  {id:"transcendent",name:"Transcendent Pack",cost:4000,rarity:"transcendent",requiredRarity: "ultimate"},
-  {id:"cosmic",name:"Cosmic Pack",cost:10000,rarity:"cosmic",requiredRarity: "transcendent"},
-  {id:"divine",name:"Divine Pack",cost:25000,rarity:"divine",requiredRarity: "cosmic"},
-  {id:"secret",name:"Secret Pack",cost:75000,rarity:"secret",requiredRarity: "divine"}
+  {id:"common",name:"Common Pack",cost:10,rarity:"common",requiredRarity: null, isHighStakes: false},
+  {id:"uncommon",name:"Uncommon Pack",cost:2500,rarity:"uncommon",requiredRarity: "common", isHighStakes: true},
+  {id:"rare",name:"Rare Pack",cost:6000,rarity:"rare",requiredRarity: "uncommon", isHighStakes: true},
+  {id:"epic",name:"Epic Pack",cost:15000,rarity:"epic",requiredRarity: "rare", isHighStakes: true},
+  {id:"legendary",name:"Legendary Pack",cost:35000,rarity:"legendary",requiredRarity: "epic", isHighStakes: true},
+  {id:"mythic",name:"Mythic Pack",cost:80000,rarity:"mythic",requiredRarity: "legendary", isHighStakes: true},
+  {id:"ultimate",name:"Ultimate Pack",cost:180000,rarity:"ultimate",requiredRarity: "mythic", isHighStakes: true},
+  {id:"transcendent",name:"Transcendent Pack",cost:400000,rarity:"transcendent",requiredRarity: "ultimate", isHighStakes: true},
+  {id:"cosmic",name:"Cosmic Pack",cost:1000000,rarity:"cosmic",requiredRarity: "transcendent", isHighStakes: true},
+  {id:"divine",name:"Divine Pack",cost:2500000,rarity:"divine",requiredRarity: "cosmic", isHighStakes: true},
+  {id:"secret",name:"Secret Pack",cost:7500000,rarity:"secret",requiredRarity: "divine", isHighStakes: true}
 ];
+
+// Duplikat-Rückgaben auch x100 für High Stakes Packs
+// Für Common bleibt alles gleich
+const HIGH_STAKES_MULTIPLIER = 100;
+
+function getDuplicateReturn(rarity, isHighStakesPack) {
+  const baseReturn = RARITIES[rarity].duplicateReturn;
+  if (rarity === 'common' || !isHighStakesPack) {
+    return baseReturn;
+  }
+  return baseReturn * HIGH_STAKES_MULTIPLIER;
+}
+
+function getSkinValue(rarity, isHighStakesPack) {
+  const baseValue = RARITIES[rarity].value;
+  if (rarity === 'common' || !isHighStakesPack) {
+    return baseValue;
+  }
+  return baseValue * HIGH_STAKES_MULTIPLIER;
+}
 
 function generateSkins() {
   const prefixes = ["Shadow","Fire","Ice","Storm","Thunder","Wind","Earth","Water","Light","Dark","Ancient","Mystic","Crystal","Ruby","Sapphire","Emerald","Diamond","Golden","Silver","Bronze","Phantom","Ghost","Spirit","Demon","Angel","Dragon","Phoenix","Wolf","Tiger","Eagle","Cosmic","Void","Star","Moon","Sun","Galaxy","Nebula","Quantum","Chrono","Eternal"];
@@ -744,7 +779,7 @@ function generateSkins() {
     }
     
     if (rarityId === 'secret') {
-      allSkins.push({ name: "🌈 MAXWELL THE CAT", rarity: "secret", baseCoins: 500000, image: "https://placekitten.com/400/400" });
+      allSkins.push({ name: "🌈 MAXWELL THE CAT", rarity: "secret", baseCoins: 500000 * HIGH_STAKES_MULTIPLIER, image: "https://placekitten.com/400/400" });
       targetCount--;
     }
     
@@ -752,7 +787,11 @@ function generateSkins() {
       const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
       const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
       let name = `${prefix} ${suffix}`;
-      allSkins.push({ name: name, rarity: rarityId, baseCoins: rarityData.value, image: `https://picsum.photos/300?${rarityId}=${i}${Math.random()}` });
+      let baseValue = rarityData.value;
+      if (rarityId !== 'common') {
+        baseValue = baseValue * HIGH_STAKES_MULTIPLIER;
+      }
+      allSkins.push({ name: name, rarity: rarityId, baseCoins: baseValue, image: `https://picsum.photos/300?${rarityId}=${i}${Math.random()}` });
     }
   }
   return allSkins;
@@ -762,7 +801,7 @@ const skins = generateSkins();
 const totalSkins = skins.length;
 
 let ownedSkins = [];
-let coins = 10;
+let coins = 1000; // Start mit 1000 Coins (genug für Common Packs)
 let activeSkinName = null;
 let autoOpenActive = false;
 let autoOpenInterval = null;
@@ -857,7 +896,7 @@ function loadGameData() {
   if(savedOwned) ownedSkins = JSON.parse(savedOwned);
   if(savedCoins !== null) coins = JSON.parse(savedCoins);
   if(savedActive !== null) activeSkinName = JSON.parse(savedActive);
-  if(coins < 0) coins = 10;
+  if(coins < 0) coins = 1000;
   updateCoins();
   updateStats();
 }
@@ -870,7 +909,7 @@ function resetGame() {
   if(confirm("⚠️ ACHTUNG! Kompletter Reset - Alle Skins und Coins weg! ⚠️\n\nWirklich neu starten?")) {
     localStorage.clear();
     ownedSkins = [];
-    coins = 10;
+    coins = 1000;
     activeSkinName = null;
     save();
     updateCoins();
@@ -879,11 +918,11 @@ function resetGame() {
     updateStats();
     loadActiveSkin();
     if(autoOpenActive) stopAutoOpen();
-    alert("✅ Reset komplett! Du hast 10 Coins zum Gamblen.");
+    alert("✅ Reset komplett! Du hast 1000 Coins zum Gamblen.");
   }
 }
 
-function getRandomSkinByPack(packRarity) {
+function getRandomSkinByPack(packRarity, isHighStakes) {
   let roll = Math.random() * 100;
   let cumulative = 0;
   let selectedRarity = packRarity;
@@ -931,6 +970,7 @@ function checkAndUnlockPacks() {
 
 function gamble(packId, showPopup = false) {
   const pack = packs.find(p=>p.id===packId);
+  const isHighStakes = pack.isHighStakes;
   
   // Prüfe ob Pack freigeschaltet ist
   if (!isPackUnlocked(pack)) {
@@ -948,17 +988,17 @@ function gamble(packId, showPopup = false) {
   let totalReturn = 0;
   
   for(let i = 0; i < 3; i++){
-    const skin = getRandomSkinByPack(pack.rarity);
+    const skin = getRandomSkinByPack(pack.rarity, isHighStakes);
     const owned = ownedSkins.includes(skin.name);
     
     if(owned){
-      const returnCoins = RARITIES[skin.rarity].duplicateReturn;
+      const returnCoins = getDuplicateReturn(skin.rarity, isHighStakes);
       coins += returnCoins;
       totalReturn += returnCoins;
       dupRewards.push({skin, returnCoins});
     } else {
       ownedSkins.push(skin.name);
-      const skinValue = RARITIES[skin.rarity].value;
+      const skinValue = getSkinValue(skin.rarity, isHighStakes);
       coins += skinValue;
       totalReturn += skinValue;
       newSkins.push(skin);
@@ -989,7 +1029,8 @@ function showResultPopup(pack, newSkins, dupRewards, totalReturn) {
   
   [...newSkins, ...dupRewards.map(d => d.skin)].forEach(skin => {
     const isNew = newSkins.includes(skin);
-    const reward = isNew ? RARITIES[skin.rarity].value : dupRewards.find(d => d.skin === skin)?.returnCoins;
+    const reward = isNew ? getSkinValue(skin.rarity, pack.isHighStakes) : dupRewards.find(d => d.skin === skin)?.returnCoins;
+    const perItemCost = pack.cost / 3;
     
     resultDiv.innerHTML += `
     <div class="skin-card ${skin.rarity}">
@@ -997,15 +1038,18 @@ function showResultPopup(pack, newSkins, dupRewards, totalReturn) {
       <h3>${skin.name}</h3>
       <p>${RARITIES[skin.rarity].name}</p>
       <p style="color:${isNew ? '#22c55e' : '#fbbf24'}">${isNew ? '✨ NEU! ✨' : '🔄 Duplikat'}</p>
-      <p>💰 +${reward} Coins</p>
-      ${isNew ? '<div class="profit-badge">Neuer Skin!</div>' : `<div class="profit-badge">+${reward - pack.cost/3} Coins</div>`}
+      <p>💰 +${reward.toLocaleString()} Coins</p>
+      ${isNew ? '<div class="profit-badge">Neuer Skin!</div>' : `<div class="profit-badge">${reward - perItemCost >= 0 ? '+' : ''}${(reward - perItemCost).toLocaleString()} Coins</div>`}
     </div>`;
   });
   
   const totalProfit = totalReturn - pack.cost;
+  const profitColor = totalProfit >= 0 ? '#22c55e' : '#ef4444';
+  const profitSign = totalProfit >= 0 ? '+' : '';
+  
   const summary = document.createElement('div');
-  summary.style.cssText = `margin-top:20px;padding:15px;background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.1));border-radius:12px;text-align:center;border:2px solid #22c55e;width:100%;`;
-  summary.innerHTML = `<h3>💰 GAMBLE ZUSAMMENFASSUNG</h3><p>💸 Einsatz: ${pack.cost} Coins</p><p>💎 Rückgabe: ${totalReturn} Coins</p><p style="font-size:24px; color:#22c55e; margin-top:10px;">📈 GEWINN: +${totalProfit} Coins!</p><p>✨ Neue Skins: ${newSkins.length} | 🔄 Duplikate: ${dupRewards.length}</p>`;
+  summary.style.cssText = `margin-top:20px;padding:15px;background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.1));border-radius:12px;text-align:center;border:2px solid ${profitColor};width:100%;`;
+  summary.innerHTML = `<h3>💰 GAMBLE ZUSAMMENFASSUNG</h3><p>💸 Einsatz: ${pack.cost.toLocaleString()} Coins</p><p>💎 Rückgabe: ${totalReturn.toLocaleString()} Coins</p><p style="font-size:24px; color:${profitColor}; margin-top:10px;">📈 ${profitSign}${totalProfit.toLocaleString()} Coins</p><p>✨ Neue Skins: ${newSkins.length} | 🔄 Duplikate: ${dupRewards.length}</p>`;
   resultDiv.appendChild(summary);
 }
 
@@ -1118,25 +1162,31 @@ function renderPacks() {
   
   packs.forEach(pack => {
     const rarityData = RARITIES[pack.rarity];
-    const profit = rarityData.duplicateReturn - pack.cost;
     const isUnlocked = isPackUnlocked(pack);
     const requiredRarity = pack.requiredRarity;
     const requiredName = requiredRarity ? RARITIES[requiredRarity]?.name : null;
     const owned = requiredRarity ? getOwnedCountByRarity(requiredRarity) : 0;
     const total = requiredRarity ? getTotalCountByRarity(requiredRarity) : 0;
+    const profit = getDuplicateReturn(pack.rarity, pack.isHighStakes) - pack.cost;
     
     let requirementText = '';
     if (!isUnlocked && requiredRarity) {
       requirementText = `<div class="requirement-info">🔒 Benötigt: ALLE ${requiredName} Skins (${owned}/${total})</div>`;
     }
     
+    let stakesBadge = '';
+    if (pack.isHighStakes) {
+      stakesBadge = `<div class="stakes-badge">🔥 HIGH STAKES x100 🔥</div>`;
+    }
+    
     div.innerHTML += `
     <div class="pack ${!isUnlocked ? 'locked-pack' : ''}">
       ${!isUnlocked ? `<div class="lock-overlay"><span>🔒</span><p>Nicht freigeschaltet</p></div>` : ''}
       <h2>${pack.name}</h2>
-      <div class="cost">💰 ${pack.cost} Coins</div>
-      <div class="reward-info">🎁 Enthält: ${rarityData.name}+ Skins<br>🔄 Duplikat Bonus: ${rarityData.duplicateReturn} Coins</div>
-      <div class="profit-info">💰 GARANTIERTER GEWINN: +${profit} Coins pro Gamble!</div>
+      ${stakesBadge}
+      <div class="cost ${pack.isHighStakes ? 'high-stakes' : ''}">💰 ${pack.cost.toLocaleString()} Coins</div>
+      <div class="reward-info">🎁 Enthält: ${rarityData.name}+ Skins<br>🔄 Duplikat Bonus: ${getDuplicateReturn(pack.rarity, pack.isHighStakes).toLocaleString()} Coins</div>
+      <div class="profit-info">💰 GARANTIERTER GEWINN: +${profit.toLocaleString()} Coins pro Gamble!</div>
       ${requirementText}
       <button class="gamble-btn" onclick="startGamble('${pack.id}')" ${!isUnlocked ? 'disabled' : ''}>🎲 GAMBLE (3x Klick)</button>
       <button class="scratch-btn" onclick="startScratch('${pack.id}')" ${!isUnlocked ? 'disabled' : ''}>🖱️ SCRATCH (Rüberfahren)</button>
@@ -1149,7 +1199,6 @@ function renderPacks() {
 function toggleAutoOpen(packId) {
   const pack = packs.find(p=>p.id===packId);
   
-  // Prüfe Freischaltung für Auto-Gamble
   if (!isPackUnlocked(pack)) {
     alert(`🔒 ${pack.name} ist gesperrt! Kann nicht im Auto-Modus gespielt werden.`);
     return;
@@ -1166,14 +1215,13 @@ function toggleAutoOpen(packId) {
 function startAutoOpen(packId) {
   const pack = packs.find(p=>p.id===packId);
   
-  // Nochmal prüfen
   if (!isPackUnlocked(pack)) {
     alert(`🔒 ${pack.name} ist gesperrt!`);
     return;
   }
   
   if(coins < pack.cost) {
-    alert(`Nicht genug Coins für ${pack.name}! Benötigt: ${pack.cost} Coins`);
+    alert(`Nicht genug Coins für ${pack.name}! Benötigt: ${pack.cost.toLocaleString()} Coins`);
     return;
   }
   
@@ -1199,7 +1247,6 @@ function startAutoOpen(packId) {
       alert(`⚠️ Auto-Gamble gestoppt! Nicht genug Coins für ${currentPack.name}!`);
       return;
     }
-    // Prüfe ob Pack noch freigeschaltet ist
     if (!isPackUnlocked(currentPack)) {
       stopAutoOpen();
       alert(`⚠️ Auto-Gamble gestoppt! ${currentPack.name} wurde gesperrt?`);
@@ -1250,7 +1297,7 @@ function renderIndex() {
       <h3>${owned ? skin.name : '???'}</h3>
       <p>${RARITIES[skin.rarity].name}</p>
       ${owned ? `<button onclick="event.stopPropagation(); equipSkinFromIndex('${skin.name.replace(/'/g, "\\'")}')">🔧 Ausrüsten</button>` : '<button disabled style="opacity:0.5; cursor:not-allowed;">🔒 Nicht besessen</button>'}
-      <div class="stat-badge">💰 Wert: ${skin.baseCoins} Coins<br>🔄 Duplikat: ${RARITIES[skin.rarity].duplicateReturn} Coins</div>
+      <div class="stat-badge">💰 Wert: ${skin.baseCoins.toLocaleString()} Coins<br>🔄 Duplikat: ${(skin.rarity === 'common' ? RARITIES[skin.rarity].duplicateReturn : RARITIES[skin.rarity].duplicateReturn * HIGH_STAKES_MULTIPLIER).toLocaleString()} Coins</div>
     </div>`;
   });
 }
@@ -1265,7 +1312,7 @@ function equipSkinFromIndex(name) {
   activeSkinName = skin.name;
   document.getElementById("activeSkin").src = skin.image;
   document.getElementById("activeSkinName").innerHTML = skin.name;
-  document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins} Coins)`;
+  document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins.toLocaleString()} Coins)`;
   const profileImg = document.getElementById("activeSkin");
   profileImg.style.border = `3px solid ${RARITIES[skin.rarity].color}`;
   save();
@@ -1278,7 +1325,7 @@ function loadActiveSkin() {
     if(skin) {
       document.getElementById("activeSkin").src = skin.image;
       document.getElementById("activeSkinName").innerHTML = skin.name;
-      document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins} Coins)`;
+      document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins.toLocaleString()} Coins)`;
       const profileImg = document.getElementById("activeSkin");
       profileImg.style.border = `3px solid ${RARITIES[skin.rarity].color}`;
       return;
