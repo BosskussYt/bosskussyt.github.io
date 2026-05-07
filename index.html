@@ -2,371 +2,537 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Gambling - Pack Opening</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ultimate Gambling - Platform Selector</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body{
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:white;
-  min-height:100vh;
+/* Start Screen Styles */
+.start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease;
 }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter:blur(10px);
-  position:sticky;
-  top:0;
-  z-index:100;
-  flex-wrap:wrap;
-  gap:15px;
+.start-container {
+  text-align: center;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
 }
 
-h1{
-  font-size:24px;
-  background:linear-gradient(90deg,#38bdf8,#a855f7);
-  background-clip:text;
-  color:transparent;
+.start-title {
+  font-size: 48px;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #38bdf8, #a855f7);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: glow 2s ease-in-out infinite;
 }
 
-.coins{
-  background:gold;
-  color:black;
-  padding:10px 20px;
-  border-radius:12px;
-  font-weight:bold;
-  font-size:20px;
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 5px rgba(56,189,248,0.5); }
+  50% { text-shadow: 0 0 20px rgba(168,85,247,0.8); }
 }
 
-.stats{
-  display:flex;
-  gap:20px;
-  background:rgba(0,0,0,0.3);
-  padding:10px 20px;
-  border-radius:12px;
+.start-subtitle {
+  color: #94a3b8;
+  margin-bottom: 40px;
+  font-size: 18px;
 }
 
-.stat{
-  font-size:14px;
+.platform-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
-.stat span{
-  color:#38bdf8;
-  font-weight:bold;
+.platform-btn {
+  padding: 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
 
-.reset-btn{
-  background:linear-gradient(90deg,#ef4444,#dc2626);
-  color:white;
-  padding:8px 16px;
-  border-radius:10px;
-  font-size:14px;
-  cursor:pointer;
+.platform-btn:hover {
+  transform: translateY(-5px) scale(1.02);
 }
 
-.reset-btn:hover{
-  transform:scale(1.05);
+.ios-btn {
+  background: linear-gradient(135deg, #000000, #1c1c1e);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
-.container{
-  max-width:1400px;
-  margin:auto;
-  padding:30px;
+.android-btn {
+  background: linear-gradient(135deg, #3ddc84, #1a73e8);
+  color: white;
 }
 
-.section-title{
-  font-size:32px;
-  margin-bottom:20px;
-  margin-top:40px;
+.pc-btn {
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
-.packs{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;
+.platform-icon {
+  font-size: 32px;
 }
 
-.pack{
-  background:rgba(255,255,255,0.08);
-  border-radius:20px;
-  padding:25px;
-  text-align:center;
-  transition:0.3s;
-  border:1px solid rgba(255,255,255,0.1);
+.info-text {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 30px;
+  padding: 15px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 15px;
 }
 
-.pack:hover{
-  transform:translateY(-10px);
+/* Main Game Styles */
+body {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.pack h2{
-  margin-bottom:10px;
-  font-size:24px;
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.pack .cost{
-  font-size:28px;
-  font-weight:bold;
-  color:#fbbf24;
-  margin:10px 0;
+h1 {
+  font-size: 24px;
+  background: linear-gradient(90deg, #38bdf8, #a855f7);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-.pack .reward-info{
-  font-size:12px;
-  margin:10px 0;
-  padding:8px;
-  background:rgba(0,0,0,0.3);
-  border-radius:8px;
+.coins {
+  background: gold;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-.pack .profit-info{
-  font-size:13px;
-  color:#22c55e;
-  margin-top:5px;
-  font-weight:bold;
+.stats {
+  display: flex;
+  gap: 20px;
+  background: rgba(0,0,0,0.3);
+  padding: 10px 20px;
+  border-radius: 12px;
 }
 
-button{
-  border:none;
-  padding:12px 18px;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:bold;
-  transition:0.2s;
+.stat {
+  font-size: 14px;
 }
 
-.gamble-btn{
-  background:linear-gradient(90deg,#f59e0b,#ea580c);
-  color:white;
-  width:100%;
-  margin-top:10px;
+.stat span {
+  color: #38bdf8;
+  font-weight: bold;
 }
 
-.scratch-btn{
-  background:linear-gradient(90deg,#14b8a6,#0d9488);
-  color:white;
-  width:100%;
-  margin-top:10px;
+.reset-btn {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
 }
 
-.auto-btn{
-  background:linear-gradient(90deg,#ef4444,#dc2626);
-  color:white;
-  width:100%;
-  margin-top:10px;
+.reset-btn:hover {
+  transform: scale(1.05);
 }
 
-.auto-btn.running{
-  background:linear-gradient(90deg,#22c55e,#16a34a);
-  animation:pulse 1s infinite;
+.container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 30px;
 }
 
-@keyframes pulse{
-  0%{opacity:1;}
-  50%{opacity:0.7;}
-  100%{opacity:1;}
+.section-title {
+  font-size: 32px;
+  margin-bottom: 20px;
+  margin-top: 40px;
 }
 
-button:hover{
-  transform:scale(1.05);
+.packs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-.profile{
-  margin-top:40px;
-  background:rgba(255,255,255,0.08);
-  border-radius:20px;
-  padding:30px;
-  text-align:center;
+.pack {
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 25px;
+  text-align: center;
+  transition: 0.3s;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-.profile img{
-  width:200px;
-  height:200px;
-  object-fit:cover;
-  border-radius:20px;
-  margin-top:15px;
-  border:3px solid gold;
+.pack:hover {
+  transform: translateY(-10px);
 }
 
-.popup{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:#0f172a;
-  width:90%;
-  max-width:1000px;
-  border-radius:20px;
-  padding:30px;
-  z-index:999;
-  display:none;
-  max-height:80vh;
-  overflow-y:auto;
+.pack h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
 }
 
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  display:none;
+.pack .cost {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fbbf24;
+  margin: 10px 0;
 }
 
-.result{
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  justify-content:center;
-  margin-top:20px;
+.pack .reward-info {
+  font-size: 12px;
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
 }
 
-.close-btn{
-  background:crimson;
-  color:white;
-  width:100%;
-  margin-top:20px;
+.pack .profit-info {
+  font-size: 13px;
+  color: #22c55e;
+  margin-top: 5px;
+  font-weight: bold;
 }
 
-.index-box{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
+/* Button Styles - FIXED */
+button {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s;
 }
 
-.skin-card{
-  background:rgba(255,255,255,0.08);
-  border-radius:20px;
-  padding:15px;
-  text-align:center;
-  transition:0.3s;
-  cursor:pointer;
-  position:relative;
+.gamble-btn {
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  color: white;
+  width: 100%;
+  margin-top: 10px;
 }
 
-.skin-card:hover{
-  transform:scale(1.05);
-  background:rgba(255,255,255,0.15);
+.scratch-btn {
+  background: linear-gradient(90deg, #14b8a6, #0d9488);
+  color: white;
+  width: 100%;
+  margin-top: 10px;
 }
 
-.skin-card img{
-  width:100%;
-  height:160px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:10px;
+.auto-btn {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+  width: 100%;
+  margin-top: 10px;
 }
 
-.skin-card button{
-  margin-top:10px;
-  background:linear-gradient(90deg,#f59e0b,#d97706);
-  color:white;
-  width:100%;
+.auto-btn.running {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  animation: pulse 1s infinite;
 }
 
-.common{border:3px solid #9ca3af;}
-.uncommon{border:3px solid #22c55e;}
-.rare{border:3px solid #3b82f6;}
-.epic{border:3px solid #a855f7;}
-.legendary{border:3px solid #f59e0b;}
-.mythic{border:3px solid #ec489a;}
-.ultimate{border:3px solid #ef4444; box-shadow:0 0 10px #ef4444;}
-.transcendent{border:3px solid #8b5cf6; box-shadow:0 0 15px #8b5cf6;}
-.cosmic{border:3px solid #06b6d4; box-shadow:0 0 20px #06b6d4;}
-.divine{border:3px solid gold; box-shadow:0 0 30px gold;}
-.secret{
-  border:3px solid white;
-  animation:rainbow 2s infinite linear;
+button:hover {
+  transform: scale(1.05);
 }
 
-@keyframes rainbow{
-  0%{filter:hue-rotate(0deg);}
-  100%{filter:hue-rotate(360deg);}
+/* iOS spezifische Button-Optimierung - FIXED */
+.ios-mode button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.locked{
-  filter:brightness(0.3);
-  opacity:0.6;
+.ios-mode .gamble-btn,
+.ios-mode .scratch-btn,
+.ios-mode .auto-btn,
+.ios-mode .reset-btn,
+.ios-mode .platform-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 12px;
 }
 
-.unlocked{
-  filter:brightness(1);
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
-.equipped-badge{
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:gold;
-  color:black;
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:bold;
-  z-index:1;
+.profile {
+  margin-top: 40px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
 }
 
-.animation-area{
-  text-align:center;
-  margin-top:20px;
-  min-height:200px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.profile img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 20px;
+  margin-top: 15px;
+  border: 3px solid gold;
 }
 
-.stat-badge{
-  background:rgba(0,0,0,0.7);
-  padding:5px;
-  border-radius:10px;
-  margin-top:10px;
-  font-size:12px;
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0f172a;
+  width: 90%;
+  max-width: 1000px;
+  border-radius: 20px;
+  padding: 30px;
+  z-index: 999;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-.auto-status{
-  margin-top:10px;
-  font-size:12px;
-  padding:5px;
-  background:rgba(0,0,0,0.5);
-  border-radius:8px;
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
 }
 
-.profit-badge{
-  background:linear-gradient(135deg,#22c55e,#15803d);
-  padding:5px 10px;
-  border-radius:10px;
-  font-size:12px;
-  display:inline-block;
-  margin-top:5px;
-  font-weight:bold;
+.result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.gamble-wheel{
-  font-size:48px;
+.close-btn {
+  background: crimson;
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.index-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.skin-card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 15px;
+  text-align: center;
+  transition: 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+.skin-card:hover {
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.15);
+}
+
+.skin-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.skin-card button {
+  margin-top: 10px;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  color: white;
+  width: 100%;
+}
+
+.common { border: 3px solid #9ca3af; }
+.uncommon { border: 3px solid #22c55e; }
+.rare { border: 3px solid #3b82f6; }
+.epic { border: 3px solid #a855f7; }
+.legendary { border: 3px solid #f59e0b; }
+.mythic { border: 3px solid #ec489a; }
+.ultimate { border: 3px solid #ef4444; box-shadow: 0 0 10px #ef4444; }
+.transcendent { border: 3px solid #8b5cf6; box-shadow: 0 0 15px #8b5cf6; }
+.cosmic { border: 3px solid #06b6d4; box-shadow: 0 0 20px #06b6d4; }
+.divine { border: 3px solid gold; box-shadow: 0 0 30px gold; }
+.secret {
+  border: 3px solid white;
+  animation: rainbow 2s infinite linear;
+}
+
+@keyframes rainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.locked {
+  filter: brightness(0.3);
+  opacity: 0.6;
+}
+
+.unlocked {
+  filter: brightness(1);
+}
+
+.equipped-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: gold;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.animation-area {
+  text-align: center;
+  margin-top: 20px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-badge {
+  background: rgba(0,0,0,0.7);
+  padding: 5px;
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.auto-status {
+  margin-top: 10px;
+  font-size: 12px;
+  padding: 5px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 8px;
+}
+
+.profit-badge {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  display: inline-block;
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+.gamble-wheel {
+  font-size: 48px;
   animation: spin 0.5s linear infinite;
 }
 
-@keyframes spin{
-  from{transform:rotate(0deg);}
-  to{transform:rotate(360deg);}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* PC spezifisch */
+.pc-mode button:hover {
+  transform: scale(1.05);
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
-
 <body>
 
+<!-- Start Screen -->
+<div class="start-screen" id="startScreen">
+  <div class="start-container">
+    <div class="start-title">🎰 ULTIMATE GAMBLING</div>
+    <div class="start-subtitle">Wähle deine Plattform</div>
+    
+    <div class="platform-buttons">
+      <button class="platform-btn ios-btn" onclick="selectPlatform('ios')">
+        <span class="platform-icon">🍎</span>
+        <span>iOS / iPhone</span>
+        <span class="platform-icon">📱</span>
+      </button>
+      
+      <button class="platform-btn android-btn" onclick="selectPlatform('android')">
+        <span class="platform-icon">🤖</span>
+        <span>Android</span>
+        <span class="platform-icon">📱</span>
+      </button>
+      
+      <button class="platform-btn pc-btn" onclick="selectPlatform('pc')">
+        <span class="platform-icon">💻</span>
+        <span>PC / Browser</span>
+        <span class="platform-icon">🖥️</span>
+      </button>
+    </div>
+    
+    <div class="info-text">
+      💡 Tipp: iOS Nutzer können die App zum Homescreen hinzufügen!<br>
+      Safari → Teilen → "Zum Homescreen"
+    </div>
+  </div>
+</div>
+
+<!-- Main Game Content -->
+<div id="gameContent" style="display: none;">
 <header>
 <div>
-<h1>🎰 Ultimate Gambling - Pack Opening</h1>
+<h1>🎰 Ultimate Gambling - <span id="platformBadge">Loading...</span></h1>
 <div class="stats">
 <div class="stat">📊 Besitz: <span id="collectionPercent">0</span>%</div>
 <div class="stat">✨ Skins: <span id="ownedCount">0</span>/<span id="totalCount">0</span></div>
@@ -379,7 +545,6 @@ button:hover{
 </header>
 
 <div class="container">
-
 <h2 class="section-title">🎲 Packs (Immer Gewinn)</h2>
 <div class="packs" id="packs"></div>
 
@@ -392,7 +557,6 @@ button:hover{
 
 <h2 class="section-title">📚 Skin-Index (Sammlung)</h2>
 <div class="index-box" id="index"></div>
-
 </div>
 
 <div class="overlay" id="overlay"></div>
@@ -402,9 +566,41 @@ button:hover{
 <div class="result" id="result"></div>
 <button class="close-btn" onclick="closePopup()">Schließen</button>
 </div>
+</div>
 
 <script>
-// Raritäten
+// Plattform Auswahl
+let currentPlatform = 'pc';
+
+function selectPlatform(platform) {
+  currentPlatform = platform;
+  const startScreen = document.getElementById('startScreen');
+  const gameContent = document.getElementById('gameContent');
+  const platformBadge = document.getElementById('platformBadge');
+  
+  if (platform === 'ios') {
+    platformBadge.innerHTML = '🍎 iOS Mode';
+    document.body.classList.add('ios-mode');
+    document.body.classList.remove('pc-mode');
+  } else if (platform === 'android') {
+    platformBadge.innerHTML = '🤖 Android Mode';
+    document.body.classList.remove('ios-mode', 'pc-mode');
+  } else {
+    platformBadge.innerHTML = '💻 PC Mode';
+    document.body.classList.add('pc-mode');
+    document.body.classList.remove('ios-mode');
+  }
+  
+  startScreen.style.opacity = '0';
+  setTimeout(() => {
+    startScreen.style.display = 'none';
+    gameContent.style.display = 'block';
+    initGame();
+  }, 500);
+}
+
+// ============= GAME LOGIC =============
+
 const RARITIES = {
   common: { name: "Common", color: "#9ca3af", value: 8, dropChance: 45, duplicateReturn: 15 },
   uncommon: { name: "Uncommon", color: "#22c55e", value: 22, dropChance: 25, duplicateReturn: 40 },
@@ -419,7 +615,6 @@ const RARITIES = {
   secret: { name: "Secret", color: "white", value: 105000, dropChance: 0.1, duplicateReturn: 110000 }
 };
 
-// Packs
 const packs = [
   {id:"common",name:"Common Pack",cost:10,rarity:"common"},
   {id:"uncommon",name:"Uncommon Pack",cost:25,rarity:"uncommon"},
@@ -434,26 +629,13 @@ const packs = [
   {id:"secret",name:"Secret Pack",cost:75000,rarity:"secret"}
 ];
 
-// Generiere Skins
 function generateSkins() {
-  const prefixes = [
-    "Shadow", "Fire", "Ice", "Storm", "Thunder", "Wind", "Earth", "Water", "Light", "Dark",
-    "Ancient", "Mystic", "Crystal", "Ruby", "Sapphire", "Emerald", "Diamond", "Golden", "Silver", "Bronze",
-    "Phantom", "Ghost", "Spirit", "Demon", "Angel", "Dragon", "Phoenix", "Wolf", "Tiger", "Eagle",
-    "Cosmic", "Void", "Star", "Moon", "Sun", "Galaxy", "Nebula", "Quantum", "Chrono", "Eternal"
-  ];
-  
-  const suffixes = [
-    "Blade", "Shield", "Helmet", "Armor", "Cape", "Mask", "Crown", "Ring", "Amulet",
-    "Warrior", "Mage", "Rogue", "Hunter", "Assassin", "Knight", "Paladin", "Druid", "Berserker",
-    "Wraith", "Reaper", "Sentinel", "Guardian", "Titan", "Colossus", "Behemoth"
-  ];
-  
+  const prefixes = ["Shadow","Fire","Ice","Storm","Thunder","Wind","Earth","Water","Light","Dark","Ancient","Mystic","Crystal","Ruby","Sapphire","Emerald","Diamond","Golden","Silver","Bronze","Phantom","Ghost","Spirit","Demon","Angel","Dragon","Phoenix","Wolf","Tiger","Eagle","Cosmic","Void","Star","Moon","Sun","Galaxy","Nebula","Quantum","Chrono","Eternal"];
+  const suffixes = ["Blade","Shield","Helmet","Armor","Cape","Mask","Crown","Ring","Amulet","Warrior","Mage","Rogue","Hunter","Assassin","Knight","Paladin","Druid","Berserker","Wraith","Reaper","Sentinel","Guardian","Titan","Colossus","Behemoth"];
   const allSkins = [];
   
   for (const [rarityId, rarityData] of Object.entries(RARITIES)) {
     let targetCount = 0;
-    
     switch(rarityId) {
       case 'secret': targetCount = 25; break;
       case 'divine': targetCount = 30; break;
@@ -470,13 +652,7 @@ function generateSkins() {
     }
     
     if (rarityId === 'secret') {
-      allSkins.push({
-        name: "🌈 MAXWELL THE CAT",
-        rarity: "secret",
-        baseCoins: 500000,
-        image: "https://placekitten.com/400/400",
-        isSpecial: true
-      });
+      allSkins.push({ name: "🌈 MAXWELL THE CAT", rarity: "secret", baseCoins: 500000, image: "https://placekitten.com/400/400" });
       targetCount--;
     }
     
@@ -484,32 +660,22 @@ function generateSkins() {
       const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
       const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
       let name = `${prefix} ${suffix}`;
-      
-      allSkins.push({
-        name: name,
-        rarity: rarityId,
-        baseCoins: rarityData.value,
-        image: `https://picsum.photos/300?${rarityId}=${i}${Math.random()}`
-      });
+      allSkins.push({ name: name, rarity: rarityId, baseCoins: rarityData.value, image: `https://picsum.photos/300?${rarityId}=${i}${Math.random()}` });
     }
   }
-  
   return allSkins;
 }
 
 const skins = generateSkins();
 const totalSkins = skins.length;
 
-// Spielzustand
 let ownedSkins = [];
 let coins = 10;
 let activeSkinName = null;
-
 let autoOpenActive = false;
 let autoOpenInterval = null;
 let currentAutoPack = null;
 
-// Stats
 function updateStats() {
   const owned = ownedSkins.length;
   const percent = totalSkins > 0 ? (owned / totalSkins * 100).toFixed(1) : 0;
@@ -518,7 +684,29 @@ function updateStats() {
   document.getElementById('totalCount').innerText = totalSkins;
 }
 
-// Reset
+function save() {
+  localStorage.setItem("ownedSkins", JSON.stringify(ownedSkins));
+  localStorage.setItem("coins", JSON.stringify(coins));
+  localStorage.setItem("activeSkinName", JSON.stringify(activeSkinName));
+  updateStats();
+}
+
+function loadGameData() {
+  const savedOwned = localStorage.getItem("ownedSkins");
+  const savedCoins = localStorage.getItem("coins");
+  const savedActive = localStorage.getItem("activeSkinName");
+  if(savedOwned) ownedSkins = JSON.parse(savedOwned);
+  if(savedCoins !== null) coins = JSON.parse(savedCoins);
+  if(savedActive !== null) activeSkinName = JSON.parse(savedActive);
+  if(coins < 0) coins = 10;
+  updateCoins();
+  updateStats();
+}
+
+function updateCoins() {
+  document.getElementById("coins").innerText = Math.floor(coins);
+}
+
 function resetGame() {
   if(confirm("⚠️ ACHTUNG! Kompletter Reset - Alle Skins und Coins weg! ⚠️\n\nWirklich neu starten?")) {
     localStorage.clear();
@@ -535,69 +723,10 @@ function resetGame() {
   }
 }
 
-// Save/Load
-function save(){
-  localStorage.setItem("ownedSkins",JSON.stringify(ownedSkins));
-  localStorage.setItem("coins",JSON.stringify(coins));
-  localStorage.setItem("activeSkinName",JSON.stringify(activeSkinName));
-  updateStats();
-}
-
-function loadGameData() {
-  const savedOwned = localStorage.getItem("ownedSkins");
-  const savedCoins = localStorage.getItem("coins");
-  const savedActive = localStorage.getItem("activeSkinName");
-  
-  if(savedOwned) ownedSkins = JSON.parse(savedOwned);
-  if(savedCoins !== null) coins = JSON.parse(savedCoins);
-  if(savedActive !== null) activeSkinName = JSON.parse(savedActive);
-  
-  if(coins < 0) coins = 10;
-  updateCoins();
-  updateStats();
-}
-
-// Render Packs
-function renderPacks(){
-  const div = document.getElementById("packs");
-  div.innerHTML = "";
-  
-  packs.forEach(pack=>{
-    const rarityData = RARITIES[pack.rarity];
-    const profit = rarityData.duplicateReturn - pack.cost;
-    
-    div.innerHTML += `
-    <div class="pack">
-      <h2>${pack.name}</h2>
-      <div class="cost">💰 ${pack.cost} Coins</div>
-      <div class="reward-info">
-        🎁 Enthält: ${rarityData.name}+ Skins<br>
-        🔄 Duplikat Bonus: ${rarityData.duplicateReturn} Coins
-      </div>
-      <div class="profit-info">
-        💰 GARANTIERTER GEWINN: +${profit} Coins pro Gamble!
-      </div>
-      <button class="gamble-btn" onclick="startGamble('${pack.id}')">
-        🎲 GAMBLE (3x Klick)
-      </button>
-      <button class="scratch-btn" onclick="startScratch('${pack.id}')">
-        🖱️ SCRATCH (Rüberfahren)
-      </button>
-      <button class="auto-btn" id="autoBtn_${pack.id}" onclick="toggleAutoOpen('${pack.id}')">
-        🤖 AUTO-GAMBLE
-      </button>
-      <div class="auto-status" id="autoStatus_${pack.id}"></div>
-    </div>
-    `;
-  });
-}
-
-// Skin ziehen
 function getRandomSkinByPack(packRarity) {
   let roll = Math.random() * 100;
   let cumulative = 0;
   let selectedRarity = packRarity;
-  
   const rarityOrder = ['secret', 'divine', 'cosmic', 'transcendent', 'ultimate', 'mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common'];
   
   for (let i = 0; i < rarityOrder.length; i++) {
@@ -613,12 +742,8 @@ function getRandomSkinByPack(packRarity) {
   
   const packIndex = rarityOrder.indexOf(packRarity);
   const selectedIndex = rarityOrder.indexOf(selectedRarity);
+  if (selectedIndex > packIndex) selectedRarity = packRarity;
   
-  if (selectedIndex > packIndex) {
-    selectedRarity = packRarity;
-  }
-  
-  // Jackpot Chance
   if (Math.random() < 0.002 && packRarity === 'secret') {
     const jackpot = skins.find(s => s.name === "🌈 MAXWELL THE CAT");
     if (jackpot) return jackpot;
@@ -626,14 +751,11 @@ function getRandomSkinByPack(packRarity) {
   
   const possibleSkins = skins.filter(s => s.rarity === selectedRarity);
   if (possibleSkins.length === 0) return skins[0];
-  
   return possibleSkins[Math.floor(Math.random() * possibleSkins.length)];
 }
 
-// Gamble Funktion
 function gamble(packId, showPopup = false) {
   const pack = packs.find(p=>p.id===packId);
-  
   if(coins < pack.cost) return false;
   
   coins -= pack.cost;
@@ -672,14 +794,10 @@ function gamble(packId, showPopup = false) {
   
   save();
   
-  if(showPopup) {
-    showResultPopup(pack, newSkins, dupRewards, totalReturn);
-  }
-  
+  if(showPopup) showResultPopup(pack, newSkins, dupRewards, totalReturn);
   return true;
 }
 
-// Resultat Popup
 function showResultPopup(pack, newSkins, dupRewards, totalReturn) {
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
@@ -693,42 +811,18 @@ function showResultPopup(pack, newSkins, dupRewards, totalReturn) {
       <img src="${skin.image}">
       <h3>${skin.name}</h3>
       <p>${RARITIES[skin.rarity].name}</p>
-      <p style="color:${isNew ? '#22c55e' : '#fbbf24'}">
-        ${isNew ? '✨ NEU! ✨' : '🔄 Duplikat'}
-      </p>
+      <p style="color:${isNew ? '#22c55e' : '#fbbf24'}">${isNew ? '✨ NEU! ✨' : '🔄 Duplikat'}</p>
       <p>💰 +${reward} Coins</p>
       ${isNew ? '<div class="profit-badge">Neuer Skin!</div>' : `<div class="profit-badge">+${reward - pack.cost/3} Coins</div>`}
-    </div>
-    `;
+    </div>`;
   });
   
   const totalProfit = totalReturn - pack.cost;
   const summary = document.createElement('div');
-  summary.style.cssText = `
-    margin-top:20px;
-    padding:15px;
-    background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.1));
-    border-radius:12px;
-    text-align:center;
-    border:2px solid #22c55e;
-    width:100%;
-  `;
-  
-  summary.innerHTML = `
-    <h3>💰 GAMBLE ZUSAMMENFASSUNG</h3>
-    <p>💸 Einsatz: ${pack.cost} Coins</p>
-    <p>💎 Rückgabe: ${totalReturn} Coins</p>
-    <p style="font-size:24px; color:#22c55e; margin-top:10px;">
-      📈 GEWINN: +${totalProfit} Coins!
-    </p>
-    <p>✨ Neue Skins: ${newSkins.length} | 🔄 Duplikate: ${dupRewards.length}</p>
-  `;
-  
+  summary.style.cssText = `margin-top:20px;padding:15px;background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.1));border-radius:12px;text-align:center;border:2px solid #22c55e;width:100%;`;
+  summary.innerHTML = `<h3>💰 GAMBLE ZUSAMMENFASSUNG</h3><p>💸 Einsatz: ${pack.cost} Coins</p><p>💎 Rückgabe: ${totalReturn} Coins</p><p style="font-size:24px; color:#22c55e; margin-top:10px;">📈 GEWINN: +${totalProfit} Coins!</p><p>✨ Neue Skins: ${newSkins.length} | 🔄 Duplikate: ${dupRewards.length}</p>`;
   resultDiv.appendChild(summary);
 }
-
-// Gamble mit 3-Klick Animation
-let gambleTimeout = null;
 
 function startGamble(packId){
   if(autoOpenActive) stopAutoOpen();
@@ -739,55 +833,35 @@ function startGamble(packId){
   const result = document.getElementById("result");
   
   result.innerHTML = "";
-  
-  // 3-Klick Mechanismus
   let clicks = 0;
   const gambleDiv = document.createElement("div");
-  gambleDiv.style.cssText = `
-    background:linear-gradient(135deg,#f59e0b,#ea580c);
-    padding:60px;
-    border-radius:20px;
-    cursor:pointer;
-    font-size:30px;
-    text-align:center;
-    transition:0.2s;
-    font-weight:bold;
-  `;
+  gambleDiv.style.cssText = `background:linear-gradient(135deg,#f59e0b,#ea580c);padding:60px;border-radius:20px;cursor:pointer;font-size:30px;text-align:center;transition:0.2s;font-weight:bold;`;
   gambleDiv.innerHTML = "🎲 KLICK ZUM GAMBLEN (3x) 🎲";
   
   const clickHandler = () => {
     clicks++;
     gambleDiv.style.transform = `scale(${1 + clicks * 0.15}) rotate(${clicks * 15}deg)`;
-    
     if(clicks === 1) gambleDiv.innerHTML = "⚡ 2. KLICK ⚡";
     if(clicks === 2) gambleDiv.innerHTML = "💎 LETZTER KLICK 💎";
     
     if(clicks >= 3){
       gambleDiv.removeEventListener('click', clickHandler);
       gambleDiv.innerHTML = '<div class="gamble-wheel">🎰 🎲 🎰</div>';
-      gambleDiv.style.animation = "pulse 0.5s infinite";
-      
       setTimeout(() => {
         const success = gamble(packId, true);
         animation.innerHTML = "";
-        if(!success){
-          result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
-        }
-        gambleTimeout = null;
+        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
       }, 500);
     }
   };
   
   gambleDiv.onclick = clickHandler;
-  
   animation.innerHTML = "";
   animation.appendChild(gambleDiv);
-  
   popup.style.display = "block";
   overlay.style.display = "block";
 }
 
-// Scratch Mechanismus
 function startScratch(packId){
   if(autoOpenActive) stopAutoOpen();
   
@@ -797,19 +871,8 @@ function startScratch(packId){
   const result = document.getElementById("result");
   
   result.innerHTML = "";
-  
   const scratchDiv = document.createElement("div");
-  scratchDiv.style.cssText = `
-    background:linear-gradient(135deg,#64748b,#475569);
-    padding:60px;
-    border-radius:20px;
-    cursor:pointer;
-    font-size:24px;
-    text-align:center;
-    transition:0.3s;
-    user-select:none;
-    font-weight:bold;
-  `;
+  scratchDiv.style.cssText = `background:linear-gradient(135deg,#64748b,#475569);padding:60px;border-radius:20px;cursor:pointer;font-size:24px;text-align:center;transition:0.3s;user-select:none;font-weight:bold;`;
   scratchDiv.innerHTML = "🪙 SCRATCH ZUM GAMBLEN 🪙\n(Mit Maus rüberfahren)";
   
   let scratched = false;
@@ -827,26 +890,42 @@ function startScratch(packId){
       setTimeout(() => {
         const success = gamble(packId, true);
         animation.innerHTML = "";
-        if(!success){
-          result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
-        }
+        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
       }, 300);
     }
   };
   
   scratchDiv.onmousemove = scratchHandler;
   scratchDiv.onclick = scratchHandler;
-  
   animation.innerHTML = "";
   animation.appendChild(scratchDiv);
-  
   popup.style.display = "block";
   overlay.style.display = "block";
 }
 
-// Auto-Gamble
-function toggleAutoOpen(packId){
-  if(autoOpenActive && currentAutoPack === packId){
+function renderPacks() {
+  const div = document.getElementById("packs");
+  div.innerHTML = "";
+  
+  packs.forEach(pack => {
+    const rarityData = RARITIES[pack.rarity];
+    const profit = rarityData.duplicateReturn - pack.cost;
+    div.innerHTML += `
+    <div class="pack">
+      <h2>${pack.name}</h2>
+      <div class="cost">💰 ${pack.cost} Coins</div>
+      <div class="reward-info">🎁 Enthält: ${rarityData.name}+ Skins<br>🔄 Duplikat Bonus: ${rarityData.duplicateReturn} Coins</div>
+      <div class="profit-info">💰 GARANTIERTER GEWINN: +${profit} Coins pro Gamble!</div>
+      <button class="gamble-btn" onclick="startGamble('${pack.id}')">🎲 GAMBLE (3x Klick)</button>
+      <button class="scratch-btn" onclick="startScratch('${pack.id}')">🖱️ SCRATCH (Rüberfahren)</button>
+      <button class="auto-btn" id="autoBtn_${pack.id}" onclick="toggleAutoOpen('${pack.id}')">🤖 AUTO-GAMBLE</button>
+      <div class="auto-status" id="autoStatus_${pack.id}"></div>
+    </div>`;
+  });
+}
+
+function toggleAutoOpen(packId) {
+  if(autoOpenActive && currentAutoPack === packId) {
     stopAutoOpen();
   } else {
     if(autoOpenActive) stopAutoOpen();
@@ -854,10 +933,9 @@ function toggleAutoOpen(packId){
   }
 }
 
-function startAutoOpen(packId){
+function startAutoOpen(packId) {
   const pack = packs.find(p=>p.id===packId);
-  
-  if(coins < pack.cost){
+  if(coins < pack.cost) {
     alert(`Nicht genug Coins für ${pack.name}! Benötigt: ${pack.cost} Coins`);
     return;
   }
@@ -866,72 +944,62 @@ function startAutoOpen(packId){
   currentAutoPack = packId;
   
   const autoBtn = document.getElementById(`autoBtn_${packId}`);
-  if(autoBtn){
+  if(autoBtn) {
     autoBtn.classList.add('running');
     autoBtn.innerHTML = '⏹️ AUTO-GAMBLE STOPPEN';
   }
   
   const statusDiv = document.getElementById(`autoStatus_${packId}`);
-  if(statusDiv){
+  if(statusDiv) {
     statusDiv.innerHTML = '🟢 Auto-Gamble läuft... (Coins werden generiert!)';
     statusDiv.style.color = '#22c55e';
   }
   
   autoOpenInterval = setInterval(() => {
     const currentPack = packs.find(p=>p.id===currentAutoPack);
-    
-    if(coins < currentPack.cost){
+    if(coins < currentPack.cost) {
       stopAutoOpen();
       alert(`⚠️ Auto-Gamble gestoppt! Nicht genug Coins für ${currentPack.name}!`);
       return;
     }
-    
     gamble(currentAutoPack, false);
-    
   }, 300);
 }
 
-function stopAutoOpen(){
-  if(autoOpenInterval){
+function stopAutoOpen() {
+  if(autoOpenInterval) {
     clearInterval(autoOpenInterval);
     autoOpenInterval = null;
   }
   
-  if(currentAutoPack){
+  if(currentAutoPack) {
     const autoBtn = document.getElementById(`autoBtn_${currentAutoPack}`);
-    if(autoBtn){
+    if(autoBtn) {
       autoBtn.classList.remove('running');
       autoBtn.innerHTML = '🤖 AUTO-GAMBLE';
     }
-    
     const statusDiv = document.getElementById(`autoStatus_${currentAutoPack}`);
-    if(statusDiv){
+    if(statusDiv) {
       statusDiv.innerHTML = '⚫ Auto-Gamble gestoppt';
       statusDiv.style.color = '#ef4444';
-      setTimeout(() => {
-        if(statusDiv) statusDiv.innerHTML = '';
-      }, 2000);
+      setTimeout(() => { if(statusDiv) statusDiv.innerHTML = ''; }, 2000);
     }
   }
-  
   autoOpenActive = false;
   currentAutoPack = null;
 }
 
-// Index und Ausrüstung
-function renderIndex(){
+function renderIndex() {
   const div = document.getElementById("index");
   div.innerHTML = "";
-  
   const sortedSkins = [...skins].sort((a,b) => {
     const order = ['secret', 'divine', 'cosmic', 'transcendent', 'ultimate', 'mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common'];
     return order.indexOf(a.rarity) - order.indexOf(b.rarity);
   });
   
-  sortedSkins.forEach(skin=>{
+  sortedSkins.forEach(skin => {
     const owned = ownedSkins.includes(skin.name);
     const isEquipped = (activeSkinName === skin.name);
-    
     div.innerHTML += `
     <div class="skin-card ${skin.rarity}" onclick="equipSkinFromIndex('${skin.name.replace(/'/g, "\\'")}')">
       ${isEquipped ? '<div class="equipped-badge">⚡ Ausgerüstet</div>' : ''}
@@ -939,53 +1007,32 @@ function renderIndex(){
       <h3>${owned ? skin.name : '???'}</h3>
       <p>${RARITIES[skin.rarity].name}</p>
       ${owned ? `<button onclick="event.stopPropagation(); equipSkinFromIndex('${skin.name.replace(/'/g, "\\'")}')">🔧 Ausrüsten</button>` : '<button disabled style="opacity:0.5; cursor:not-allowed;">🔒 Nicht besessen</button>'}
-      <div class="stat-badge">
-        💰 Wert: ${skin.baseCoins} Coins<br>
-        🔄 Duplikat: ${RARITIES[skin.rarity].duplicateReturn} Coins
-      </div>
-    </div>
-    `;
+      <div class="stat-badge">💰 Wert: ${skin.baseCoins} Coins<br>🔄 Duplikat: ${RARITIES[skin.rarity].duplicateReturn} Coins</div>
+    </div>`;
   });
 }
 
-function equipSkinFromIndex(name){
+function equipSkinFromIndex(name) {
   const owned = ownedSkins.includes(name);
-  
-  if(!owned){
+  if(!owned) {
     alert("Du besitzt diese Skin noch nicht! Gamble für mehr Skins!");
     return;
   }
-  
   const skin = skins.find(s=>s.name === name);
   activeSkinName = skin.name;
-  
   document.getElementById("activeSkin").src = skin.image;
   document.getElementById("activeSkinName").innerHTML = skin.name;
   document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins} Coins)`;
-  
   const profileImg = document.getElementById("activeSkin");
   profileImg.style.border = `3px solid ${RARITIES[skin.rarity].color}`;
-  
   save();
   renderIndex();
 }
 
-function updateCoins(){
-  document.getElementById("coins").innerText = Math.floor(coins);
-}
-
-function closePopup(){
-  if(gambleTimeout) clearTimeout(gambleTimeout);
-  document.getElementById("popup").style.display = "none";
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("animationArea").innerHTML = "";
-  document.getElementById("result").innerHTML = "";
-}
-
-function loadActiveSkin(){
-  if(activeSkinName && ownedSkins.includes(activeSkinName)){
+function loadActiveSkin() {
+  if(activeSkinName && ownedSkins.includes(activeSkinName)) {
     const skin = skins.find(s=>s.name === activeSkinName);
-    if(skin){
+    if(skin) {
       document.getElementById("activeSkin").src = skin.image;
       document.getElementById("activeSkinName").innerHTML = skin.name;
       document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins} Coins)`;
@@ -994,32 +1041,34 @@ function loadActiveSkin(){
       return;
     }
   }
-  
-  if(ownedSkins.length > 0){
+  if(ownedSkins.length > 0) {
     const firstOwned = skins.find(s=>s.name === ownedSkins[0]);
-    if(firstOwned){
-      equipSkinFromIndex(firstOwned.name);
-      return;
-    }
+    if(firstOwned) equipSkinFromIndex(firstOwned.name);
+    return;
   }
-  
   document.getElementById("activeSkin").src = "https://picsum.photos/300?random=100";
   document.getElementById("activeSkinName").innerHTML = "Keine Skin";
   document.getElementById("activeSkinRarity").innerHTML = "Gamble für coole Skins!";
 }
 
-// Initialisierung
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("animationArea").innerHTML = "";
+  document.getElementById("result").innerHTML = "";
+}
+
+function initGame() {
+  loadGameData();
+  renderPacks();
+  renderIndex();
+  updateCoins();
+  loadActiveSkin();
+}
+
 window.addEventListener('beforeunload', () => {
   if(autoOpenInterval) clearInterval(autoOpenInterval);
-  if(gambleTimeout) clearTimeout(gambleTimeout);
 });
-
-loadGameData();
-renderPacks();
-renderIndex();
-updateCoins();
-loadActiveSkin();
 </script>
-
 </body>
 </html>
