@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ultimate Gambling - Platform Selector</title>
+<title>Ultimate Gambling - Freischalt System</title>
 
 <style>
 * {
@@ -158,6 +158,7 @@ h1 {
   background: rgba(0,0,0,0.3);
   padding: 10px 20px;
   border-radius: 12px;
+  flex-wrap: wrap;
 }
 
 .stat {
@@ -167,6 +168,20 @@ h1 {
 .stat span {
   color: #38bdf8;
   font-weight: bold;
+}
+
+.progress-stat {
+  background: rgba(34,197,94,0.2);
+  padding: 5px 10px;
+  border-radius: 8px;
+  color: #22c55e;
+}
+
+.locked-stat {
+  background: rgba(239,68,68,0.2);
+  padding: 5px 10px;
+  border-radius: 8px;
+  color: #ef4444;
 }
 
 .reset-btn {
@@ -209,10 +224,45 @@ h1 {
   text-align: center;
   transition: 0.3s;
   border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
 }
 
 .pack:hover {
   transform: translateY(-10px);
+}
+
+.pack.locked-pack {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.pack.locked-pack:hover {
+  transform: none;
+}
+
+.pack .lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(5px);
+}
+
+.pack .lock-overlay span {
+  font-size: 48px;
+}
+
+.pack .lock-overlay p {
+  font-size: 14px;
+  color: #fbbf24;
 }
 
 .pack h2 {
@@ -242,7 +292,15 @@ h1 {
   font-weight: bold;
 }
 
-/* Button Styles - FIXED */
+.pack .requirement-info {
+  font-size: 11px;
+  color: #fbbf24;
+  margin-top: 8px;
+  padding: 5px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 8px;
+}
+
 button {
   border: none;
   padding: 12px 18px;
@@ -259,11 +317,23 @@ button {
   margin-top: 10px;
 }
 
+.gamble-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .scratch-btn {
   background: linear-gradient(90deg, #14b8a6, #0d9488);
   color: white;
   width: 100%;
   margin-top: 10px;
+}
+
+.scratch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .auto-btn {
@@ -273,29 +343,24 @@ button {
   margin-top: 10px;
 }
 
+.auto-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .auto-btn.running {
   background: linear-gradient(90deg, #22c55e, #16a34a);
   animation: pulse 1s infinite;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   transform: scale(1.05);
 }
 
-/* iOS spezifische Button-Optimierung - FIXED */
 .ios-mode button {
   -webkit-appearance: none;
   appearance: none;
-}
-
-.ios-mode .gamble-btn,
-.ios-mode .scratch-btn,
-.ios-mode .auto-btn,
-.ios-mode .reset-btn,
-.ios-mode .platform-btn {
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 12px;
 }
 
 @keyframes pulse {
@@ -481,15 +546,38 @@ button:hover {
   to { transform: rotate(360deg); }
 }
 
-/* PC spezifisch */
-.pc-mode button:hover {
+.pc-mode button:hover:not(:disabled) {
   transform: scale(1.05);
 }
 
-/* Fade-in Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.unlock-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-weight: bold;
+  z-index: 1000;
+  animation: slideUp 0.5s ease, fadeOut 0.5s ease 3s forwards;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(34,197,94,0.5);
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
 }
 </style>
 </head>
@@ -536,6 +624,7 @@ button:hover {
 <div class="stats">
 <div class="stat">📊 Besitz: <span id="collectionPercent">0</span>%</div>
 <div class="stat">✨ Skins: <span id="ownedCount">0</span>/<span id="totalCount">0</span></div>
+<div class="stat" id="unlockStatus">🔓 Fortschritt: -</div>
 </div>
 </div>
 <div style="display:flex; gap:10px; align-items:center;">
@@ -545,7 +634,7 @@ button:hover {
 </header>
 
 <div class="container">
-<h2 class="section-title">🎲 Packs (Immer Gewinn)</h2>
+<h2 class="section-title">🎲 Packs (Freischaltbar)</h2>
 <div class="packs" id="packs"></div>
 
 <div class="profile">
@@ -602,31 +691,34 @@ function selectPlatform(platform) {
 // ============= GAME LOGIC =============
 
 const RARITIES = {
-  common: { name: "Common", color: "#9ca3af", value: 8, dropChance: 45, duplicateReturn: 15 },
-  uncommon: { name: "Uncommon", color: "#22c55e", value: 22, dropChance: 25, duplicateReturn: 40 },
-  rare: { name: "Rare", color: "#3b82f6", value: 55, dropChance: 12, duplicateReturn: 85 },
-  epic: { name: "Epic", color: "#a855f7", value: 130, dropChance: 7, duplicateReturn: 175 },
-  legendary: { name: "Legendary", color: "#f59e0b", value: 320, dropChance: 4, duplicateReturn: 420 },
-  mythic: { name: "Mythic", color: "#ec489a", value: 850, dropChance: 2.5, duplicateReturn: 1000 },
-  ultimate: { name: "Ultimate", color: "#ef4444", value: 2200, dropChance: 1.5, duplicateReturn: 2500 },
-  transcendent: { name: "Transcendent", color: "#8b5cf6", value: 5500, dropChance: 1, duplicateReturn: 6100 },
-  cosmic: { name: "Cosmic", color: "#06b6d4", value: 13000, dropChance: 0.6, duplicateReturn: 14100 },
-  divine: { name: "Divine", color: "gold", value: 32000, dropChance: 0.3, duplicateReturn: 34200 },
-  secret: { name: "Secret", color: "white", value: 105000, dropChance: 0.1, duplicateReturn: 110000 }
+  common: { name: "Common", color: "#9ca3af", value: 8, dropChance: 45, duplicateReturn: 15, order: 1 },
+  uncommon: { name: "Uncommon", color: "#22c55e", value: 22, dropChance: 25, duplicateReturn: 40, order: 2 },
+  rare: { name: "Rare", color: "#3b82f6", value: 55, dropChance: 12, duplicateReturn: 85, order: 3 },
+  epic: { name: "Epic", color: "#a855f7", value: 130, dropChance: 7, duplicateReturn: 175, order: 4 },
+  legendary: { name: "Legendary", color: "#f59e0b", value: 320, dropChance: 4, duplicateReturn: 420, order: 5 },
+  mythic: { name: "Mythic", color: "#ec489a", value: 850, dropChance: 2.5, duplicateReturn: 1000, order: 6 },
+  ultimate: { name: "Ultimate", color: "#ef4444", value: 2200, dropChance: 1.5, duplicateReturn: 2500, order: 7 },
+  transcendent: { name: "Transcendent", color: "#8b5cf6", value: 5500, dropChance: 1, duplicateReturn: 6100, order: 8, requiredPrevious: true },
+  cosmic: { name: "Cosmic", color: "#06b6d4", value: 13000, dropChance: 0.6, duplicateReturn: 14100, order: 9, requiredPrevious: true },
+  divine: { name: "Divine", color: "gold", value: 32000, dropChance: 0.3, duplicateReturn: 34200, order: 10, requiredPrevious: true },
+  secret: { name: "Secret", color: "white", value: 105000, dropChance: 0.1, duplicateReturn: 110000, order: 11, requiredPrevious: true }
 };
 
+// Freischalt-Reihenfolge
+const UNLOCK_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'ultimate', 'transcendent', 'cosmic', 'divine', 'secret'];
+
 const packs = [
-  {id:"common",name:"Common Pack",cost:10,rarity:"common"},
-  {id:"uncommon",name:"Uncommon Pack",cost:25,rarity:"uncommon"},
-  {id:"rare",name:"Rare Pack",cost:60,rarity:"rare"},
-  {id:"epic",name:"Epic Pack",cost:150,rarity:"epic"},
-  {id:"legendary",name:"Legendary Pack",cost:350,rarity:"legendary"},
-  {id:"mythic",name:"Mythic Pack",cost:800,rarity:"mythic"},
-  {id:"ultimate",name:"Ultimate Pack",cost:1800,rarity:"ultimate"},
-  {id:"transcendent",name:"Transcendent Pack",cost:4000,rarity:"transcendent"},
-  {id:"cosmic",name:"Cosmic Pack",cost:10000,rarity:"cosmic"},
-  {id:"divine",name:"Divine Pack",cost:25000,rarity:"divine"},
-  {id:"secret",name:"Secret Pack",cost:75000,rarity:"secret"}
+  {id:"common",name:"Common Pack",cost:10,rarity:"common",requiredRarity: null},
+  {id:"uncommon",name:"Uncommon Pack",cost:25,rarity:"uncommon",requiredRarity: "common"},
+  {id:"rare",name:"Rare Pack",cost:60,rarity:"rare",requiredRarity: "uncommon"},
+  {id:"epic",name:"Epic Pack",cost:150,rarity:"epic",requiredRarity: "rare"},
+  {id:"legendary",name:"Legendary Pack",cost:350,rarity:"legendary",requiredRarity: "epic"},
+  {id:"mythic",name:"Mythic Pack",cost:800,rarity:"mythic",requiredRarity: "legendary"},
+  {id:"ultimate",name:"Ultimate Pack",cost:1800,rarity:"ultimate",requiredRarity: "mythic"},
+  {id:"transcendent",name:"Transcendent Pack",cost:4000,rarity:"transcendent",requiredRarity: "ultimate"},
+  {id:"cosmic",name:"Cosmic Pack",cost:10000,rarity:"cosmic",requiredRarity: "transcendent"},
+  {id:"divine",name:"Divine Pack",cost:25000,rarity:"divine",requiredRarity: "cosmic"},
+  {id:"secret",name:"Secret Pack",cost:75000,rarity:"secret",requiredRarity: "divine"}
 ];
 
 function generateSkins() {
@@ -676,12 +768,79 @@ let autoOpenActive = false;
 let autoOpenInterval = null;
 let currentAutoPack = null;
 
+// Hilfsfunktionen für Freischalt-Bedingungen
+function getSkinsByRarity(rarity) {
+  return skins.filter(s => s.rarity === rarity);
+}
+
+function getOwnedCountByRarity(rarity) {
+  const allOfRarity = getSkinsByRarity(rarity);
+  const ownedOfRarity = ownedSkins.filter(skin => {
+    const skinData = skins.find(s => s.name === skin);
+    return skinData && skinData.rarity === rarity;
+  });
+  return ownedOfRarity.length;
+}
+
+function getTotalCountByRarity(rarity) {
+  return getSkinsByRarity(rarity).length;
+}
+
+function isRarityComplete(rarity) {
+  const owned = getOwnedCountByRarity(rarity);
+  const total = getTotalCountByRarity(rarity);
+  return owned >= total;
+}
+
+function isPackUnlocked(pack) {
+  if (!pack.requiredRarity) return true;
+  return isRarityComplete(pack.requiredRarity);
+}
+
+function getNextLockedPack() {
+  for (let i = 0; i < packs.length; i++) {
+    if (!isPackUnlocked(packs[i])) {
+      return packs[i];
+    }
+  }
+  return null;
+}
+
+function updateUnlockStatus() {
+  const statusDiv = document.getElementById('unlockStatus');
+  const nextLocked = getNextLockedPack();
+  
+  if (nextLocked) {
+    const requiredRarity = nextLocked.requiredRarity;
+    const owned = getOwnedCountByRarity(requiredRarity);
+    const total = getTotalCountByRarity(requiredRarity);
+    const requiredRarityName = RARITIES[requiredRarity]?.name || requiredRarity;
+    statusDiv.innerHTML = `🔒 Nächstes: ${nextLocked.name}<br>🚫 Benötigt: Alle ${requiredRarityName} (${owned}/${total})`;
+    statusDiv.className = 'stat locked-stat';
+  } else {
+    statusDiv.innerHTML = `🔓 ALLE PACKS FREIGESCHALTET! 🎉`;
+    statusDiv.className = 'stat progress-stat';
+  }
+}
+
+function showUnlockNotification(packName) {
+  const notification = document.createElement('div');
+  notification.className = 'unlock-notification';
+  notification.innerHTML = `🎉 FREIGESCHALTET! 🎉<br>${packName} ist jetzt verfügbar!`;
+  document.body.appendChild(notification);
+  setTimeout(() => {
+    notification.remove();
+  }, 3500);
+}
+
+// Game Funktionen
 function updateStats() {
   const owned = ownedSkins.length;
   const percent = totalSkins > 0 ? (owned / totalSkins * 100).toFixed(1) : 0;
   document.getElementById('collectionPercent').innerText = percent;
   document.getElementById('ownedCount').innerText = owned;
   document.getElementById('totalCount').innerText = totalSkins;
+  updateUnlockStatus();
 }
 
 function save() {
@@ -715,6 +874,7 @@ function resetGame() {
     activeSkinName = null;
     save();
     updateCoins();
+    renderPacks();
     renderIndex();
     updateStats();
     loadActiveSkin();
@@ -754,8 +914,32 @@ function getRandomSkinByPack(packRarity) {
   return possibleSkins[Math.floor(Math.random() * possibleSkins.length)];
 }
 
+function checkAndUnlockPacks() {
+  let unlockedSomething = false;
+  for (let i = 0; i < packs.length; i++) {
+    const pack = packs[i];
+    if (!isPackUnlocked(pack) && pack.requiredRarity && isRarityComplete(pack.requiredRarity)) {
+      unlockedSomething = true;
+      showUnlockNotification(pack.name);
+    }
+  }
+  if (unlockedSomething) {
+    renderPacks();
+  }
+  updateUnlockStatus();
+}
+
 function gamble(packId, showPopup = false) {
   const pack = packs.find(p=>p.id===packId);
+  
+  // Prüfe ob Pack freigeschaltet ist
+  if (!isPackUnlocked(pack)) {
+    const requiredRarity = pack.requiredRarity;
+    const requiredName = RARITIES[requiredRarity]?.name || requiredRarity;
+    alert(`🔒 ${pack.name} ist noch nicht freigeschaltet!\n\nDu musst zuerst ALLE ${requiredName} Skins sammeln!`);
+    return false;
+  }
+  
   if(coins < pack.cost) return false;
   
   coins -= pack.cost;
@@ -784,6 +968,7 @@ function gamble(packId, showPopup = false) {
   updateCoins();
   renderIndex();
   updateStats();
+  checkAndUnlockPacks();
   
   if(activeSkinName && !ownedSkins.includes(activeSkinName)){
     if(ownedSkins.length > 0){
@@ -827,6 +1012,18 @@ function showResultPopup(pack, newSkins, dupRewards, totalReturn) {
 function startGamble(packId){
   if(autoOpenActive) stopAutoOpen();
   
+  const pack = packs.find(p=>p.id===packId);
+  
+  // Prüfe Freischaltung
+  if (!isPackUnlocked(pack)) {
+    const requiredRarity = pack.requiredRarity;
+    const requiredName = RARITIES[requiredRarity]?.name || requiredRarity;
+    const owned = getOwnedCountByRarity(requiredRarity);
+    const total = getTotalCountByRarity(requiredRarity);
+    alert(`🔒 ${pack.name} ist gesperrt!\n\nDu musst zuerst ALLE ${requiredName} Skins sammeln!\nFortschritt: ${owned}/${total}`);
+    return;
+  }
+  
   const popup = document.getElementById("popup");
   const overlay = document.getElementById("overlay");
   const animation = document.getElementById("animationArea");
@@ -850,7 +1047,7 @@ function startGamble(packId){
       setTimeout(() => {
         const success = gamble(packId, true);
         animation.innerHTML = "";
-        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
+        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins oder Pack gesperrt!</div>';
       }, 500);
     }
   };
@@ -864,6 +1061,18 @@ function startGamble(packId){
 
 function startScratch(packId){
   if(autoOpenActive) stopAutoOpen();
+  
+  const pack = packs.find(p=>p.id===packId);
+  
+  // Prüfe Freischaltung
+  if (!isPackUnlocked(pack)) {
+    const requiredRarity = pack.requiredRarity;
+    const requiredName = RARITIES[requiredRarity]?.name || requiredRarity;
+    const owned = getOwnedCountByRarity(requiredRarity);
+    const total = getTotalCountByRarity(requiredRarity);
+    alert(`🔒 ${pack.name} ist gesperrt!\n\nDu musst zuerst ALLE ${requiredName} Skins sammeln!\nFortschritt: ${owned}/${total}`);
+    return;
+  }
   
   const popup = document.getElementById("popup");
   const overlay = document.getElementById("overlay");
@@ -890,7 +1099,7 @@ function startScratch(packId){
       setTimeout(() => {
         const success = gamble(packId, true);
         animation.innerHTML = "";
-        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins!</div>';
+        if(!success) result.innerHTML = '<div style="color:#ef4444; text-align:center;">❌ Nicht genug Coins oder Pack gesperrt!</div>';
       }, 300);
     }
   };
@@ -910,21 +1119,42 @@ function renderPacks() {
   packs.forEach(pack => {
     const rarityData = RARITIES[pack.rarity];
     const profit = rarityData.duplicateReturn - pack.cost;
+    const isUnlocked = isPackUnlocked(pack);
+    const requiredRarity = pack.requiredRarity;
+    const requiredName = requiredRarity ? RARITIES[requiredRarity]?.name : null;
+    const owned = requiredRarity ? getOwnedCountByRarity(requiredRarity) : 0;
+    const total = requiredRarity ? getTotalCountByRarity(requiredRarity) : 0;
+    
+    let requirementText = '';
+    if (!isUnlocked && requiredRarity) {
+      requirementText = `<div class="requirement-info">🔒 Benötigt: ALLE ${requiredName} Skins (${owned}/${total})</div>`;
+    }
+    
     div.innerHTML += `
-    <div class="pack">
+    <div class="pack ${!isUnlocked ? 'locked-pack' : ''}">
+      ${!isUnlocked ? `<div class="lock-overlay"><span>🔒</span><p>Nicht freigeschaltet</p></div>` : ''}
       <h2>${pack.name}</h2>
       <div class="cost">💰 ${pack.cost} Coins</div>
       <div class="reward-info">🎁 Enthält: ${rarityData.name}+ Skins<br>🔄 Duplikat Bonus: ${rarityData.duplicateReturn} Coins</div>
       <div class="profit-info">💰 GARANTIERTER GEWINN: +${profit} Coins pro Gamble!</div>
-      <button class="gamble-btn" onclick="startGamble('${pack.id}')">🎲 GAMBLE (3x Klick)</button>
-      <button class="scratch-btn" onclick="startScratch('${pack.id}')">🖱️ SCRATCH (Rüberfahren)</button>
-      <button class="auto-btn" id="autoBtn_${pack.id}" onclick="toggleAutoOpen('${pack.id}')">🤖 AUTO-GAMBLE</button>
+      ${requirementText}
+      <button class="gamble-btn" onclick="startGamble('${pack.id}')" ${!isUnlocked ? 'disabled' : ''}>🎲 GAMBLE (3x Klick)</button>
+      <button class="scratch-btn" onclick="startScratch('${pack.id}')" ${!isUnlocked ? 'disabled' : ''}>🖱️ SCRATCH (Rüberfahren)</button>
+      <button class="auto-btn" id="autoBtn_${pack.id}" onclick="toggleAutoOpen('${pack.id}')" ${!isUnlocked ? 'disabled' : ''}>🤖 AUTO-GAMBLE</button>
       <div class="auto-status" id="autoStatus_${pack.id}"></div>
     </div>`;
   });
 }
 
 function toggleAutoOpen(packId) {
+  const pack = packs.find(p=>p.id===packId);
+  
+  // Prüfe Freischaltung für Auto-Gamble
+  if (!isPackUnlocked(pack)) {
+    alert(`🔒 ${pack.name} ist gesperrt! Kann nicht im Auto-Modus gespielt werden.`);
+    return;
+  }
+  
   if(autoOpenActive && currentAutoPack === packId) {
     stopAutoOpen();
   } else {
@@ -935,6 +1165,13 @@ function toggleAutoOpen(packId) {
 
 function startAutoOpen(packId) {
   const pack = packs.find(p=>p.id===packId);
+  
+  // Nochmal prüfen
+  if (!isPackUnlocked(pack)) {
+    alert(`🔒 ${pack.name} ist gesperrt!`);
+    return;
+  }
+  
   if(coins < pack.cost) {
     alert(`Nicht genug Coins für ${pack.name}! Benötigt: ${pack.cost} Coins`);
     return;
@@ -960,6 +1197,12 @@ function startAutoOpen(packId) {
     if(coins < currentPack.cost) {
       stopAutoOpen();
       alert(`⚠️ Auto-Gamble gestoppt! Nicht genug Coins für ${currentPack.name}!`);
+      return;
+    }
+    // Prüfe ob Pack noch freigeschaltet ist
+    if (!isPackUnlocked(currentPack)) {
+      stopAutoOpen();
+      alert(`⚠️ Auto-Gamble gestoppt! ${currentPack.name} wurde gesperrt?`);
       return;
     }
     gamble(currentAutoPack, false);
@@ -1064,6 +1307,7 @@ function initGame() {
   renderIndex();
   updateCoins();
   loadActiveSkin();
+  updateUnlockStatus();
 }
 
 window.addEventListener('beforeunload', () => {
