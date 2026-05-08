@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ultimate Gambling - High Risk x200/x100</title>
+<title>Ultimate Gambling - mit Datei-Speicher</title>
 
 <style>
 * {
@@ -184,6 +184,41 @@ h1 {
   color: #ef4444;
 }
 
+.save-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+}
+
+.save-btn:hover {
+  transform: scale(1.05);
+}
+
+.load-btn {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+}
+
+.load-btn:hover {
+  transform: scale(1.05);
+}
+
 .reset-btn {
   background: linear-gradient(90deg, #ef4444, #dc2626);
   color: white;
@@ -197,6 +232,23 @@ h1 {
 
 .reset-btn:hover {
   transform: scale(1.05);
+}
+
+.save-warning {
+  background: rgba(239,68,68,0.3);
+  border-left: 4px solid #ef4444;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.save-warning span {
+  font-size: 20px;
 }
 
 .container {
@@ -281,12 +333,6 @@ h1 {
   color: #ff3300;
   text-shadow: 0 0 5px rgba(255,51,0,0.8);
   font-size: 32px;
-}
-
-.pack .cost.ultra-stakes {
-  color: #ff0066;
-  text-shadow: 0 0 5px rgba(255,0,102,0.8);
-  font-size: 34px;
 }
 
 .pack .reward-info {
@@ -617,6 +663,10 @@ button:hover:not(:disabled) {
   color: #ff6600;
   margin-top: 5px;
 }
+
+.file-upload {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -665,13 +715,24 @@ button:hover:not(:disabled) {
 <div class="stat" id="unlockStatus">🔓 Fortschritt: -</div>
 </div>
 </div>
-<div style="display:flex; gap:10px; align-items:center;">
+<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
 <div class="coins">🪙 <span id="coins">2000</span></div>
+<div class="save-buttons">
+<button class="save-btn" onclick="saveToFile()">💾 Speichern</button>
+<button class="load-btn" onclick="loadFromFile()">📂 Laden</button>
 <button class="reset-btn" onclick="resetGame()">🔄 Reset</button>
+</div>
 </div>
 </header>
 
 <div class="container">
+<div class="save-warning" id="saveWarning">
+  <span>⚠️</span>
+  <div><strong>Wichtiger Hinweis zum Speichern:</strong><br>
+  Dein Fortschritt wird nur im Browser-Cache gespeichert. Bei PC/Handy Neustart kann der Fortschritt verloren gehen!<br>
+  <strong>📁 So speicherst du dauerhaft:</strong> Klicke auf "Speichern" → speichere die Datei als "Saver.json" auf deinem PC → Bei Neustart "Laden" und die Datei auswählen.</div>
+</div>
+
 <h2 class="section-title">🎲 HIGH RISK PACKS (x200 Kosten / x100 Belohnung)</h2>
 <div class="packs" id="packs"></div>
 
@@ -694,6 +755,9 @@ button:hover:not(:disabled) {
 <button class="close-btn" onclick="closePopup()">Schließen</button>
 </div>
 </div>
+
+<!-- Hidden file input for loading -->
+<input type="file" id="fileInput" class="file-upload" accept=".json" onchange="handleFileLoad(event)">
 
 <script>
 // Plattform Auswahl
@@ -724,6 +788,83 @@ function selectPlatform(platform) {
     gameContent.style.display = 'block';
     initGame();
   }, 500);
+}
+
+// ============= DATEI-SPEICHER FUNKTIONEN =============
+
+function saveToFile() {
+  const saveData = {
+    version: "1.0",
+    timestamp: Date.now(),
+    ownedSkins: ownedSkins,
+    coins: coins,
+    activeSkinName: activeSkinName
+  };
+  
+  const dataStr = JSON.stringify(saveData, null, 2);
+  const blob = new Blob([dataStr], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "Saver.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  // Zeige Bestätigung
+  const notification = document.createElement('div');
+  notification.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#22c55e; color:white; padding:10px 20px; border-radius:10px; z-index:10000; animation:slideUp 0.3s ease, fadeOut 0.5s ease 2s forwards;';
+  notification.innerHTML = '✅ Spielstand gespeichert!';
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 2500);
+}
+
+function loadFromFile() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFileLoad(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const saveData = JSON.parse(e.target.result);
+      
+      // Überprüfe ob die Datei gültig ist
+      if (saveData.ownedSkins && Array.isArray(saveData.ownedSkins)) {
+        ownedSkins = saveData.ownedSkins;
+        coins = saveData.coins;
+        activeSkinName = saveData.activeSkinName;
+        
+        // Aktualisiere alles
+        updateCoins();
+        renderIndex();
+        renderPacks();
+        updateStats();
+        loadActiveSkin();
+        save(); // Speichere auch im localStorage
+        if(autoOpenActive) stopAutoOpen();
+        
+        // Zeige Bestätigung
+        const notification = document.createElement('div');
+        notification.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#22c55e; color:white; padding:10px 20px; border-radius:10px; z-index:10000; animation:slideUp 0.3s ease, fadeOut 0.5s ease 2s forwards;';
+        notification.innerHTML = `✅ Spielstand geladen! (${new Date(saveData.timestamp).toLocaleString()})`;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2500);
+      } else {
+        throw new Error("Ungültige Datei");
+      }
+    } catch (error) {
+      alert('❌ Fehler beim Laden der Datei! Stelle sicher, dass es eine gültige "Saver.json" Datei ist.');
+    }
+  };
+  reader.readAsText(file);
+  
+  // Reset file input
+  event.target.value = '';
 }
 
 // ============= GAME LOGIC =============
@@ -917,14 +1058,14 @@ function updateStats() {
   updateUnlockStatus();
 }
 
-function save() {
+function saveLocal() {
   localStorage.setItem("ownedSkins", JSON.stringify(ownedSkins));
   localStorage.setItem("coins", JSON.stringify(coins));
   localStorage.setItem("activeSkinName", JSON.stringify(activeSkinName));
   updateStats();
 }
 
-function loadGameData() {
+function loadLocal() {
   const savedOwned = localStorage.getItem("ownedSkins");
   const savedCoins = localStorage.getItem("coins");
   const savedActive = localStorage.getItem("activeSkinName");
@@ -946,7 +1087,7 @@ function resetGame() {
     ownedSkins = [];
     coins = 2000;
     activeSkinName = null;
-    save();
+    saveLocal();
     updateCoins();
     renderPacks();
     renderIndex();
@@ -1051,7 +1192,7 @@ function gamble(packId, showPopup = false) {
     }
   }
   
-  save();
+  saveLocal();
   
   if(showPopup) showResultPopup(pack, newSkins, dupRewards, totalReturn);
   return true;
@@ -1353,7 +1494,7 @@ function equipSkinFromIndex(name) {
   document.getElementById("activeSkinRarity").innerHTML = `⭐ ${RARITIES_BASE[skin.rarity].name} ⭐ (Wert: ${skin.baseCoins.toLocaleString()} Coins)`;
   const profileImg = document.getElementById("activeSkin");
   profileImg.style.border = `3px solid ${RARITIES_BASE[skin.rarity].color}`;
-  save();
+  saveLocal();
   renderIndex();
 }
 
@@ -1387,7 +1528,7 @@ function closePopup() {
 }
 
 function initGame() {
-  loadGameData();
+  loadLocal();
   renderPacks();
   renderIndex();
   updateCoins();
