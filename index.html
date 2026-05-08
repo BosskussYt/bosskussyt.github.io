@@ -667,6 +667,37 @@ button:hover:not(:disabled) {
 .file-upload {
   display: none;
 }
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  z-index: 10000;
+  animation: slideInRight 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+  font-weight: bold;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.notification.success {
+  background: #22c55e;
+  color: white;
+}
+
+.notification.error {
+  background: #ef4444;
+  color: white;
+}
+
+.notification.info {
+  background: #3b82f6;
+  color: white;
+}
 </style>
 </head>
 <body>
@@ -790,34 +821,45 @@ function selectPlatform(platform) {
   }, 500);
 }
 
-// ============= DATEI-SPEICHER FUNKTIONEN =============
-
-function saveToFile() {
-  const saveData = {
-    version: "1.0",
-    timestamp: Date.now(),
-    ownedSkins: ownedSkins,
-    coins: coins,
-    activeSkinName: activeSkinName
-  };
-  
-  const dataStr = JSON.stringify(saveData, null, 2);
-  const blob = new Blob([dataStr], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "Saver.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  // Zeige Bestätigung
+// ============= BENACHRICHTIGUNGS-FUNKTION =============
+function showNotification(message, type = 'success') {
   const notification = document.createElement('div');
-  notification.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#22c55e; color:white; padding:10px 20px; border-radius:10px; z-index:10000; animation:slideUp 0.3s ease, fadeOut 0.5s ease 2s forwards;';
-  notification.innerHTML = '✅ Spielstand gespeichert!';
+  notification.className = `notification ${type}`;
+  notification.innerHTML = message;
   document.body.appendChild(notification);
-  setTimeout(() => notification.remove(), 2500);
+  setTimeout(() => {
+    if (notification.parentNode) notification.remove();
+  }, 3000);
+}
+
+// ============= DATEI-SPEICHER FUNKTIONEN =============
+function saveToFile() {
+  try {
+    // Aktuelle Spiel-Daten sammeln
+    const saveData = {
+      version: "1.0",
+      timestamp: Date.now(),
+      date: new Date().toLocaleString(),
+      ownedSkins: ownedSkins,
+      coins: coins,
+      activeSkinName: activeSkinName
+    };
+    
+    const dataStr = JSON.stringify(saveData, null, 2);
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "Saver.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('✅ Spielstand gespeichert! Datei: Saver.json', 'success');
+  } catch (error) {
+    showNotification('❌ Fehler beim Speichern!', 'error');
+  }
 }
 
 function loadFromFile() {
@@ -828,39 +870,53 @@ function handleFileLoad(event) {
   const file = event.target.files[0];
   if (!file) return;
   
+  // Prüfe Dateinamen
+  if (file.name !== "Saver.json") {
+    showNotification('⚠️ Bitte wähle die Datei "Saver.json" aus!', 'error');
+    event.target.value = '';
+    return;
+  }
+  
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const saveData = JSON.parse(e.target.result);
       
-      // Überprüfe ob die Datei gültig ist
-      if (saveData.ownedSkins && Array.isArray(saveData.ownedSkins)) {
-        ownedSkins = saveData.ownedSkins;
-        coins = saveData.coins;
-        activeSkinName = saveData.activeSkinName;
-        
-        // Aktualisiere alles
-        updateCoins();
-        renderIndex();
-        renderPacks();
-        updateStats();
-        loadActiveSkin();
-        save(); // Speichere auch im localStorage
-        if(autoOpenActive) stopAutoOpen();
-        
-        // Zeige Bestätigung
-        const notification = document.createElement('div');
-        notification.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#22c55e; color:white; padding:10px 20px; border-radius:10px; z-index:10000; animation:slideUp 0.3s ease, fadeOut 0.5s ease 2s forwards;';
-        notification.innerHTML = `✅ Spielstand geladen! (${new Date(saveData.timestamp).toLocaleString()})`;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 2500);
-      } else {
-        throw new Error("Ungültige Datei");
-      }
+      // Validiere die Daten
+      if (!saveData) throw new Error("Keine Daten");
+      if (!saveData.ownedSkins || !Array.isArray(saveData.ownedSkins)) throw new Error("Ungültiges ownedSkins Format");
+      if (typeof saveData.coins !== 'number') throw new Error("Ungültiges Coins Format");
+      
+      // Lade die Daten
+      ownedSkins = saveData.ownedSkins;
+      coins = saveData.coins;
+      activeSkinName = saveData.activeSkinName || null;
+      
+      // Stelle sicher dass Coins nicht negativ sind
+      if (coins < 0) coins = 2000;
+      
+      // Aktualisiere alles
+      updateCoins();
+      renderIndex();
+      renderPacks();
+      updateStats();
+      loadActiveSkin();
+      saveLocal();
+      if(autoOpenActive) stopAutoOpen();
+      
+      const timestamp = saveData.timestamp ? new Date(saveData.timestamp).toLocaleString() : 'unbekannt';
+      showNotification(`✅ Spielstand geladen! (${saveData.ownedSkins.length} Skins, ${saveData.coins.toLocaleString()} Coins)`, 'success');
+      
     } catch (error) {
-      alert('❌ Fehler beim Laden der Datei! Stelle sicher, dass es eine gültige "Saver.json" Datei ist.');
+      console.error("Load error:", error);
+      showNotification('❌ Fehler beim Laden der Datei! Stelle sicher, dass es eine gültige "Saver.json" Datei ist.', 'error');
     }
   };
+  
+  reader.onerror = function() {
+    showNotification('❌ Datei konnte nicht gelesen werden!', 'error');
+  };
+  
   reader.readAsText(file);
   
   // Reset file input
@@ -1094,7 +1150,7 @@ function resetGame() {
     updateStats();
     loadActiveSkin();
     if(autoOpenActive) stopAutoOpen();
-    alert("✅ Reset komplett! Du hast 2000 Coins zum Gamblen.");
+    showNotification('✅ Reset komplett! Du hast 2000 Coins.', 'success');
   }
 }
 
